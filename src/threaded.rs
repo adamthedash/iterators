@@ -5,7 +5,7 @@ use std::thread::{available_parallelism, JoinHandle};
 #[derive(Debug)]
 struct Worker<I, O>
 {
-    handle: JoinHandle<()>,
+    _handle: JoinHandle<()>,
     input: SyncSender<Option<I>>,
     output: Receiver<Option<O>>,
 }
@@ -31,7 +31,7 @@ impl<I, O> Worker<I, O>
         });
 
         Self {
-            handle,
+            _handle: handle,
             input: input_sender,
             output: output_receiver,
         }
