@@ -1,23 +1,22 @@
-use std::sync::mpsc::{Receiver, sync_channel, SyncSender};
+use std::sync::mpsc::{sync_channel, Receiver, SyncSender};
 use std::thread;
 use std::thread::{available_parallelism, JoinHandle};
 
 #[derive(Debug)]
-struct Worker<I, O>
-{
+struct Worker<I, O> {
     _handle: JoinHandle<()>,
     input: SyncSender<Option<I>>,
     output: Receiver<Option<O>>,
 }
 
 impl<I, O> Worker<I, O>
-    where
-        I: Send + 'static,
-        O: Send + 'static,
+where
+    I: Send + 'static,
+    O: Send + 'static,
 {
     fn new<F>(func: F) -> Worker<I, O>
-        where
-            F: Fn(I) -> O + Send + 'static,
+    where
+        F: Fn(I) -> O + Send + 'static,
     {
         let (input_sender, input_receiver) = sync_channel::<Option<I>>(1);
         let (output_sender, output_receiver) = sync_channel::<Option<O>>(0);
@@ -38,7 +37,6 @@ impl<I, O> Worker<I, O>
     }
 }
 
-
 #[derive(Debug)]
 pub struct ThreadedIterator<I: Iterator, FI, FO> {
     inner: I,
@@ -48,14 +46,14 @@ pub struct ThreadedIterator<I: Iterator, FI, FO> {
 }
 
 impl<I, FI, FO> ThreadedIterator<I, FI, FO>
-    where
-        I: Iterator<Item=FI>,
-        FI: Send + 'static,
-        FO: Send + 'static,
+where
+    I: Iterator<Item = FI>,
+    FI: Send + 'static,
+    FO: Send + 'static,
 {
     pub fn new<F>(iter: I, func: F) -> ThreadedIterator<I, FI, FO>
-        where
-            F: Fn(FI) -> FO + Send + Copy + 'static,
+    where
+        F: Fn(FI) -> FO + Send + Copy + 'static,
     {
         let mut new_iter = Self {
             inner: iter,
@@ -89,12 +87,11 @@ impl<I, FI, FO> ThreadedIterator<I, FI, FO>
     }
 }
 
-
 impl<I, FI, FO> Iterator for ThreadedIterator<I, FI, FO>
-    where
-        I: Iterator<Item=FI>,
-        FI: Send + 'static,
-        FO: Send + 'static,
+where
+    I: Iterator<Item = FI>,
+    FI: Send + 'static,
+    FO: Send + 'static,
 {
     type Item = FO;
 
@@ -108,21 +105,23 @@ impl<I, FI, FO> Iterator for ThreadedIterator<I, FI, FO>
     }
 }
 
-
-pub trait IntoThreadedIterator {
+pub trait IntoThreadedIterator: IntoIterator {
     /// Creates a multithreaded iterator which applies the given function in parallel.
-    fn par_map<F, FO>(self, func: F) -> ThreadedIterator<Self, <Self as Iterator>::Item, FO>
-        where
-            Self: Sized + Iterator,
-            <Self as Iterator>::Item: Send + 'static,
-            F: Fn(<Self as Iterator>::Item) -> FO + Send + Copy + 'static,
-            FO: Send + 'static
+    fn par_map<F, FO>(
+        self,
+        func: F,
+    ) -> ThreadedIterator<Self::IntoIter, <Self as IntoIterator>::Item, FO>
+    where
+        Self: Sized,
+        <Self as IntoIterator>::Item: Send + 'static,
+        F: Fn(<Self as IntoIterator>::Item) -> FO + Send + Copy + 'static,
+        FO: Send + 'static,
     {
-        ThreadedIterator::new(self, func)
+        ThreadedIterator::new(self.into_iter(), func)
     }
 }
 
-impl<I: Iterator> IntoThreadedIterator for I {}
+impl<I: IntoIterator> IntoThreadedIterator for I {}
 
 #[cfg(test)]
 mod tests {
@@ -130,7 +129,9 @@ mod tests {
 
     #[test]
     fn test_worker() {
-        fn square(x: i32) -> i32 { x * x }
+        fn square(x: i32) -> i32 {
+            x * x
+        }
 
         let pool = Worker::new(&square);
 
@@ -141,11 +142,11 @@ mod tests {
 
     #[test]
     fn test_iter() {
-        fn square(x: i32) -> i32 { x * x }
+        fn square(x: i32) -> i32 {
+            x * x
+        }
 
-        let iter = (0..10)
-            .par_map(square)
-            .collect::<Vec<_>>();
+        let iter = (0..10).par_map(square).collect::<Vec<_>>();
         assert_eq!(iter, [0, 1, 4, 9, 16, 25, 36, 49, 64, 81])
     }
 }
