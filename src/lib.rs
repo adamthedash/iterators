@@ -1,4 +1,5 @@
 pub mod buffered;
-pub mod threaded;
+pub mod interleave;
 pub mod logging;
-mod interleave;
+pub mod stateful;
+pub mod threaded;
