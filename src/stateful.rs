@@ -16,7 +16,7 @@ where
 }
 
 pub trait IntoStatefulMapIterator: IntoIterator {
-    fn stateful_map<S, F>(self, state: S, func: F) -> StatefulMapIterator<Self::IntoIter, S, F>
+    fn stateful_map<S, F>(self, func: F, state: S) -> StatefulMapIterator<Self::IntoIter, S, F>
     where
         Self: Sized,
     {
@@ -46,7 +46,7 @@ mod tests {
 
         let values = (0_u8..16).collect::<Vec<_>>();
         let mapped = values
-            .stateful_map(State { total: 0 }, cumsum)
+            .stateful_map(cumsum, State { total: 0 })
             .collect::<Vec<_>>();
 
         println!("{:?}", mapped);
@@ -67,7 +67,7 @@ mod tests {
 
         let values = (0..16).collect::<Vec<_>>();
         let mapped = values
-            .stateful_map(State { prev0: 1, prev1: 0 }, fib)
+            .stateful_map(fib, State { prev0: 1, prev1: 0 })
             .collect::<Vec<_>>();
         println!("{:?}", mapped);
     }
@@ -91,10 +91,10 @@ mod tests {
         let values = (0..16).collect::<Vec<_>>();
         let mapped = values
             .stateful_map(
+                arbitrary_vector_stuff,
                 State {
                     buffer: vec![0; 1000000],
                 },
-                arbitrary_vector_stuff,
             )
             .collect::<Vec<_>>();
         println!("{:?}", mapped);

@@ -181,4 +181,32 @@ mod tests {
             .collect::<Vec<_>>();
         println!("{:?}", mapped);
     }
+
+    #[test]
+    fn test_iterator_array() {
+        #[derive(Clone)]
+        struct State {
+            buffer: Vec<u8>,
+        }
+        fn arbitrary_vector_stuff(state: &mut State, _x: u8) -> u8 {
+            // Simulate some expensive operations on an array
+            for item in state.buffer.iter_mut() {
+                for _ in 0..100 {
+                    *item += 1;
+                    *item -= 1;
+                }
+            }
+            _x
+        }
+
+        let values = (0..128).collect::<Vec<_>>();
+        let mapped = values
+            .stateful_par_map(
+                arbitrary_vector_stuff,
+                State {
+                    buffer: vec![0; 1000000],
+                },
+            )
+            .collect::<Vec<_>>();
+    }
 }
