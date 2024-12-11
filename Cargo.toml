@@ -1,8 +1,10 @@
 [package]
-name = "buffered_iter"
+name = "iterators_extended"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/adamthedash/iterators"
+authors = ["Adam Power <adamthedash2@gmail.com>"]
 
 [dependencies]
