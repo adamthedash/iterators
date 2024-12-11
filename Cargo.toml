@@ -6,5 +6,6 @@ license = "MIT"
 readme = "README.md"
 repository = "https://github.com/adamthedash/iterators"
 authors = ["Adam Power <adamthedash2@gmail.com>"]
+description = "Some useful extensions to Rust's iterators."
 
 [dependencies]
