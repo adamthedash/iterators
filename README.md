@@ -8,3 +8,4 @@ Some useful extensions to rust's iterators.
 - stateful: Maps a function to items, but allows passing a struct to be used as "working" state. Eg. when the function needs to allocate a lot of memory to compute intermediate values.
 - threaded: Multi-threaded map that maintains the ordering of items in the iterator.  
 - stateful_threaded: Combination of the stateful and threaded modules.
+- bucket: Buckets an iterator into several vectors based on a condition function.
