@@ -3,12 +3,13 @@ pub trait Bucket {
     /// The bucketing function must map each item to its associated bucket index.
     /// This function consumes the iterator and stores all results in memory at once, so it's not
     /// suitable for bucketing massive amounts of data or in a streaming fashion.
-    fn bucket<F>(self, num_buckets: usize, partition_func: F) -> Vec<Vec<Self::Item>>
+    fn bucket<F, const N: usize>(self, partition_func: F) -> [Vec<Self::Item>; N]
     where
         Self: Iterator + Sized,
         F: Fn(&Self::Item) -> usize,
     {
-        let mut buckets = (0..num_buckets).map(|_| vec![]).collect::<Vec<_>>();
+        //let mut buckets = (0..num_buckets).map(|_| vec![]).collect::<Vec<_>>();
+        let mut buckets = std::array::from_fn(|_| vec![]);
 
         for item in self {
             let index = partition_func(&item);
@@ -41,9 +42,9 @@ mod tests {
             TestEnum::Three => 2,
         };
 
-        let buckets = items.iter().bucket(3, |x| bucket_func(x));
+        let buckets: [_; 3] = items.iter().bucket(|x| bucket_func(x));
         println!("{:?}", buckets);
-        let buckets = items.into_iter().bucket(3, bucket_func);
+        let buckets: [_; 3] = items.into_iter().bucket(bucket_func);
         println!("{:?}", buckets);
     }
 }
